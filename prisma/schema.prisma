@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId           Int      @id @default(autoincrement()) @map("user_id")
+  email            String   @unique
+  name             String?
+  password         String
+  role             Role     @default(USER)
+  isEmailVerified  Boolean  @default(false) @map("is_email_verified")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt      @map("updated_at")
+}
+
+model Token {
+  id           Int      @id @default(autoincrement())
+  token        String
+  type         TokenType
+  expires      DateTime
+  blacklisted  Boolean
+  createdAt    DateTime @default(now()) @map("created_at")
+  userId       Int      @map("user_id")
+}
+
+model Board {
+  boardId      Int      @id @default(autoincrement()) @map("board_id")
+  name         String   @unique
+  slug         String   @unique
+  description  String?
+  parentId  Int?
+  parent    Board?   @relation("BoardToBoard", fields: [parentId], references: [boardId], onDelete: Cascade)
+  children  Board[]  @relation("BoardToBoard")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt      @map("updated_at")
+}
+
+model Category {
+  categoryId   Int      @id @default(autoincrement()) @map("category_id")
+  boardId      Int      @map("board_id")
+  name         String
+  description  String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt      @map("updated_at")
+}
+
+model Tag {
+  tagId        Int      @id @default(autoincrement()) @map("tag_id")
+  name         String   @unique
+  dateCreated  DateTime @default(now()) @map("date_created")
+}
+
+model PostToTag {
+  postId       Int @map("post_id")
+  tagId        Int @map("tag_id")
+  @@id([postId, tagId])
+}
+
+model Post {
+  postId       Int      @id @default(autoincrement()) @map("post_id")
+  slug         String   @unique
+  boardId      Int      @map("board_id")
+  categoryId   Int?     @map("category_id")
+  userId       Int      @map("user_id")
+  title        String
+  content      String
+  datePosted   DateTime @default(now()) @map("date_posted")
+  views        Int      @default(0)
+  imageUrl     String?  @map("image_url")
+  likeCount    Int?     @map("like_cnt")
+}
+
+model Like {
+  likeId       Int      @id @default(autoincrement()) @map("like_id")
+  userId       Int      @map("user_id")
+  postId       Int      @map("post_id")
+}
+
+model Rating {
+  ratingId     Int      @id @default(autoincrement()) @map("rating_id")
+  userId       Int      @map("user_id")
+  postId       Int      @map("post_id")
+  ratingValue  Int      @map("rating_value")
+  dateRated    DateTime @default(now()) @map("date_rated")
+}
+
+model Comment {
+  commentId       Int      @id @default(autoincrement()) @map("comment_id")
+  postId          Int      @map("post_id")
+  userId          Int      @map("user_id")
+  parentCommentId Int?     @map("parent_comment_id")
+  content         String
+  datePosted      DateTime @default(now()) @map("date_posted")
+}
+
+model UserProfile {
+  userId            Int    @unique @map("user_id")
+  bio               String?
+  profilePicture    String? @map("profile_picture")
+  birthdate         DateTime?
+  location          String?
+  favoriteHorrorGenre String? @map("favorite_horror_genre")
+}
+
+model Bookmark {
+  bookmarkId       Int      @id @default(autoincrement()) @map("bookmark_id")
+  userId           Int      @map("user_id")
+  postId           Int      @map("post_id")
+  dateBookmarked   DateTime @default(now()) @map("date_bookmarked")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TokenType {
+  ACCESS
+  REFRESH
+  RESET_PASSWORD
+  VERIFY_EMAIL
+}
