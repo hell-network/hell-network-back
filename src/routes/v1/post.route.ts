@@ -7,6 +7,8 @@ import auth from '../../middlewares/auth';
 const router = express.Router();
 
 router.post('/', validate(postValidation.register), postController.register);
+router.post('/deletePost', postController.deletePost);
+
 router.get('/getPosts', postController.getPosts);
 router.get('/getPostById', postController.getPostById);
 

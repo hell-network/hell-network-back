@@ -48,11 +48,13 @@ function toBase62(num: number) {
 }
 
 export const slugifyTitle = (id: number, title: string) => {
-  const slug = slugify(title, {
-    lower: true, // convert to lower case
-    strict: true, // strip special characters
-    replacement: '-' // use hyphens as replacement
-  });
+  const index = title.lastIndexOf('-');
+  const slug = title.substring(index, title.length).toLocaleLowerCase();
+  // const slug = slugify(title, {
+  //   lower: true, // convert to lower case
+  //   strict: true, // strip special characters
+  //   replacement: '-' // use hyphens as replacement
+  // });
   const base62ID = toBase62(id);
   const finalSlug = `${slug}-${base62ID}`;
   return finalSlug;

@@ -10,9 +10,6 @@ import { encryptPassword } from '../utils/encryption';
  * @returns {Promise<Post>}
  */
 const createPost = async (title: string, content: string, slug: string): Promise<Post> => {
-  //   if (await getUserByEmail(email)) {
-  //     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
-  //   }
   return prisma.post.create({
     data: {
       title,
@@ -31,7 +28,15 @@ const updatePostSlug = async (postId: number, slug: string) => {
   });
 };
 
-const getPosts = async (lastId: number, boardId?: number): Promise<Post[]> => {
+const deletePost = async (postId: number): Promise<Post> => {
+  return prisma.post.delete({
+    where: {
+      postId
+    }
+  });
+};
+
+const getPosts = async (boardId?: number, lastId?: number): Promise<Post[]> => {
   //   if (await getUserByEmail(email)) {
   //     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   //   }
@@ -54,6 +59,7 @@ const getPostById = async (id: number): Promise<any> => {
 
 export default {
   createPost,
+  deletePost,
   updatePostSlug,
   getPosts,
   getPostById
