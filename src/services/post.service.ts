@@ -36,18 +36,34 @@ const deletePost = async (postId: number): Promise<Post> => {
   });
 };
 
-const getPosts = async (boardId?: number, lastId?: number): Promise<Post[]> => {
+const getPosts = async (
+  boardId?: number,
+  lastId?: number,
+  postsCount?: number
+): Promise<Post[]> => {
   //   if (await getUserByEmail(email)) {
   //     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   //   }
-  return prisma.post.findMany({
-    take: 5,
+
+  const posts = await prisma.post.findMany({
+    take: postsCount ? postsCount + 1 : 5,
     skip: lastId ? 1 : 0,
     ...(lastId && { cursor: { postId: lastId } }),
     where: boardId ? { boardId: boardId } : undefined
   });
+  console.log('posts=', posts);
+  return posts;
 };
 
+const getTotalPostCount = async (boardId?: number): Promise<number> => {
+  const where = boardId ? { boardId: boardId } : {};
+
+  const totalCount = await prisma.post.count({
+    where: where
+  });
+
+  return totalCount;
+};
 const getPostById = async (id: number): Promise<any> => {
   //   if (await getUserByEmail(email)) {
   //     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
@@ -62,5 +78,6 @@ export default {
   deletePost,
   updatePostSlug,
   getPosts,
-  getPostById
+  getPostById,
+  getTotalPostCount
 };

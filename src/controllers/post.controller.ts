@@ -4,6 +4,7 @@ import { formatResponse, slugifyTitle } from '../utils/responseFormatter';
 import { postService } from '../services';
 
 import randomstring from 'randomstring';
+import pick from '../utils/pick';
 
 const deletePost = catchAsync(async (req, res) => {
   const { id } = req.body;
@@ -27,16 +28,22 @@ const register = catchAsync(async (req, res) => {
 });
 
 const getPosts = catchAsync(async (req, res) => {
-  const { boardId, id } = req.query;
-  const posts = await postService.getPosts(parseInt(boardId as string), parseInt(id as string));
-  const lastId = posts[posts?.length - 1].postId;
+  const { boardId: queryBoardId, id: queryId, postsCount: queryPostsCount } = req.query;
+  const boardId = queryBoardId ? parseInt(String(queryBoardId), 10) : undefined;
+  const id = queryId ? parseInt(String(queryId), 10) : undefined;
+  const postsCount = queryPostsCount ? parseInt(String(queryPostsCount), 10) : 5;
+
+  const posts = await postService.getPosts(boardId, id, postsCount);
   let isLast = false;
-  if (posts.length < 5) {
+  if (posts.length - 1 < postsCount) {
     // 마지막 컨텐츠
     isLast = true;
   }
 
-  res.send(formatResponse({ posts, lastId, isLast }, 200, 'Success', null));
+  const postsSlice = posts.slice(0, postsCount);
+  const lastId = posts[postsSlice?.length - 1]?.postId;
+
+  res.send(formatResponse({ posts: postsSlice, lastId, isLast }, 200, 'Success', null));
 });
 
 const getPostById = catchAsync(async (req, res) => {
