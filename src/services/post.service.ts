@@ -73,11 +73,36 @@ const getPostById = async (id: number): Promise<any> => {
   });
 };
 
+const searchPosts = async (
+  searchString?: string,
+  skip?: number,
+  take?: number
+): Promise<Post[]> => {
+  const searchFilter = searchString
+    ? {
+        OR: [{ title: { contains: searchString } }, { content: { contains: searchString } }]
+      }
+    : {};
+
+  const posts = await prisma.post.findMany({
+    take: take || 5,
+    skip: skip || 0,
+    where: {
+      //published: true, // You can modify this condition if needed
+      ...searchFilter
+    }
+  });
+
+  console.log('searched posts=', posts);
+  return posts;
+};
+
 export default {
   createPost,
   deletePost,
   updatePostSlug,
   getPosts,
   getPostById,
-  getTotalPostCount
+  getTotalPostCount,
+  searchPosts
 };

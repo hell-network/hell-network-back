@@ -11,5 +11,6 @@ router.post('/deletePost', postController.deletePost);
 
 router.get('/getPosts', postController.getPosts);
 router.get('/getPostById', postController.getPostById);
+router.get('/searchPosts', postController.searchPosts);
 
 export default router;

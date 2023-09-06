@@ -52,9 +52,21 @@ const getPostById = catchAsync(async (req, res) => {
   res.send(formatResponse(post, 200, 'Success', null));
 });
 
+const searchPosts = catchAsync(async (req, res) => {
+  const { searchString, skip, take } = req.query;
+  const post = await postService.searchPosts(
+    searchString as string,
+    parseInt(skip as string),
+    parseInt(take as string)
+  );
+
+  res.send(formatResponse(post, 200, 'Success', null));
+});
+
 export default {
   register,
   deletePost,
   getPosts,
-  getPostById
+  getPostById,
+  searchPosts
 };
