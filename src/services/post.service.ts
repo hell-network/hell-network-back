@@ -90,11 +90,29 @@ const searchPosts = async (
     where: {
       //published: true, // You can modify this condition if needed
       ...searchFilter
+    },
+    include: {
+      tags: {
+        include: {
+          tag: {
+            select: {
+              tagId: true, // Include 'tagId' field
+              name: true, // Include 'name' field
+              dateCreated: false // Include 'dateCreated' field
+            }
+          }
+        }
+      }
     }
   });
 
-  console.log('searched posts=', posts);
-  return posts;
+  const modifiedPosts = posts.map((post) => ({
+    ...post,
+    tags: post.tags.map((tagWithSelect) => tagWithSelect.tag)
+  }));
+
+  //console.log('searched posts=', posts);
+  return modifiedPosts;
 };
 
 export default {
