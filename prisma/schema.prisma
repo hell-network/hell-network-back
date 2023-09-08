@@ -16,6 +16,11 @@ model User {
   isEmailVerified  Boolean  @default(false) @map("is_email_verified")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt      @map("updated_at")
+  profile          UserProfile?
+  tokens           Token[]
+  raiting          Rating[]
+  comments         Comment[]
+  likes            Like[]
 }
 
 model Token {
@@ -26,6 +31,7 @@ model Token {
   blacklisted  Boolean
   createdAt    DateTime @default(now()) @map("created_at")
   userId       Int      @map("user_id")
+  user         User     @relation(fields: [userId], references: [userId])
 }
 
 model Board {
@@ -33,11 +39,12 @@ model Board {
   name         String   @unique
   slug         String   @unique
   description  String?
-  parentId  Int?
-  parent    Board?   @relation("BoardToBoard", fields: [parentId], references: [boardId], onDelete: Cascade)
-  children  Board[]  @relation("BoardToBoard")
+  parentId     Int?
+  parent       Board?  @relation("BoardToBoard", fields: [parentId], references: [boardId], onDelete: Cascade)
+  children     Board[] @relation("BoardToBoard")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt      @map("updated_at")
+  posts        Post[]
 }
 
 model Category {
@@ -53,11 +60,14 @@ model Tag {
   tagId        Int      @id @default(autoincrement()) @map("tag_id")
   name         String   @unique
   dateCreated  DateTime @default(now()) @map("date_created")
+  posts          PostToTag[]
 }
 
 model PostToTag {
   postId       Int @map("post_id")
   tagId        Int @map("tag_id")
+  post        Post     @relation(fields: [postId], references: [postId])
+  tag        Tag     @relation(fields: [tagId], references: [tagId])
   @@id([postId, tagId])
 }
 
@@ -73,12 +83,19 @@ model Post {
   views        Int      @default(0)
   imageUrl     String?  @map("image_url")
   likeCount    Int?     @map("like_cnt")
+  board        Board    @relation(fields: [boardId], references: [boardId])
+  likes        Like[]
+  ratings      Rating[]
+  comments     Comment[]
+  tags          PostToTag[]
 }
 
 model Like {
   likeId       Int      @id @default(autoincrement()) @map("like_id")
   userId       Int      @map("user_id")
   postId       Int      @map("post_id")
+  user         User     @relation(fields: [userId], references: [userId])
+  post         Post     @relation(fields: [postId], references: [postId])
 }
 
 model Rating {
@@ -87,6 +104,8 @@ model Rating {
   postId       Int      @map("post_id")
   ratingValue  Int      @map("rating_value")
   dateRated    DateTime @default(now()) @map("date_rated")
+  user         User     @relation(fields: [userId], references: [userId])
+  post         Post     @relation(fields: [postId], references: [postId])
 }
 
 model Comment {
@@ -96,6 +115,10 @@ model Comment {
   parentCommentId Int?     @map("parent_comment_id")
   content         String
   datePosted      DateTime @default(now()) @map("date_posted")
+  user            User     @relation(fields: [userId], references: [userId])
+  post            Post     @relation(fields: [postId], references: [postId])
+  parentComment   Comment? @relation("ChildComments", fields: [parentCommentId], references: [commentId])
+  childComments   Comment[] @relation("ChildComments")
 }
 
 model UserProfile {
@@ -105,14 +128,17 @@ model UserProfile {
   birthdate         DateTime?
   location          String?
   favoriteHorrorGenre String? @map("favorite_horror_genre")
+  user              User    @relation(fields: [userId], references: [userId])
 }
 
-model Bookmark {
-  bookmarkId       Int      @id @default(autoincrement()) @map("bookmark_id")
-  userId           Int      @map("user_id")
-  postId           Int      @map("post_id")
-  dateBookmarked   DateTime @default(now()) @map("date_bookmarked")
-}
+// model Bookmark {
+//   bookmarkId       Int      @id @default(autoincrement()) @map("bookmark_id")
+//   userId           Int      @map("user_id")
+//   postId           Int      @map("post_id")
+//   dateBookmarked   DateTime @default(now()) @map("date_bookmarked")
+//   user             User     @relation(fields: [userId], references: [userId])
+//   post             Post     @relation(fields: [postId], references: [postId])
+// }
 
 enum Role {
   USER
