@@ -77,7 +77,7 @@ const searchPosts = async (
   searchString?: string,
   page = 1, // 페이지 번호 (기본값: 1)
   pageSize = 5 // 페이지당 아이템 수 (기본값: 5)
-): Promise<Post[]> => {
+): Promise<{ post: Post[]; totalCount: number }> => {
   const skip = (page - 1) * pageSize;
   const take = pageSize;
 
@@ -108,6 +108,11 @@ const searchPosts = async (
       }
     }
   });
+  const totalCount = await prisma.post.count({
+    where: {
+      ...searchFilter
+    }
+  });
 
   const modifiedPosts = posts.map((post) => ({
     ...post,
@@ -115,7 +120,7 @@ const searchPosts = async (
   }));
 
   //console.log('searched posts=', posts);
-  return modifiedPosts;
+  return { post: modifiedPosts, totalCount };
 };
 
 export default {
