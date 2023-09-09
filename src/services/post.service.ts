@@ -75,9 +75,12 @@ const getPostById = async (id: number): Promise<any> => {
 
 const searchPosts = async (
   searchString?: string,
-  skip?: number,
-  take?: number
+  page = 1, // 페이지 번호 (기본값: 1)
+  pageSize = 5 // 페이지당 아이템 수 (기본값: 5)
 ): Promise<Post[]> => {
+  const skip = (page - 1) * pageSize;
+  const take = pageSize;
+
   const searchFilter = searchString
     ? {
         OR: [{ title: { contains: searchString } }, { content: { contains: searchString } }]
@@ -85,8 +88,8 @@ const searchPosts = async (
     : {};
 
   const posts = await prisma.post.findMany({
-    take: take || 5,
     skip: skip || 0,
+    take: take || 5,
     where: {
       //published: true, // You can modify this condition if needed
       ...searchFilter

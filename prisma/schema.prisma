@@ -87,7 +87,7 @@ model Post {
   likes        Like[]
   ratings      Rating[]
   comments     Comment[]
-  tags          PostToTag[]
+  tags         PostToTag[]
 }
 
 model Like {
